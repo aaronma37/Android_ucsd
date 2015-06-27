@@ -99,17 +99,7 @@ public class Square {
                 GLES20.GL_FRAGMENT_SHADER,
                 fragmentShaderCode);
 
-        mProgram = GLES20.glCreateProgram();             // cre
-
-
-
-
-
-
-
-
-
-ate empty OpenGL Program
+        mProgram = GLES20.glCreateProgram();             // create empty OpenGL Program
         GLES20.glAttachShader(mProgram, vertexShader);   // add the vertex shader to program
         GLES20.glAttachShader(mProgram, fragmentShader); // add the fragment shader to program
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables

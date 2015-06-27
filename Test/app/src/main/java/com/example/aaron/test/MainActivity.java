@@ -31,6 +31,7 @@ public class MainActivity extends RosActivity {
     public Intent intent;
     public double p[];
     public float pos[]={0,0,0,0};
+    public float poseData[]={0,0,0,0,0};
 
     //public turtle turt;
     TextView poseX;
@@ -135,7 +136,8 @@ public class MainActivity extends RosActivity {
             pos[1]=(float)poseview.getY();
             pos[2]=(float)poseview.getZ();
             pos[3]=(float)poseview.getYaw();
-            System.out.println("found"+pos[3]);
+            poseData=poseview.getPoseData();
+            System.out.println("found"+poseData);
             talker.setP(p);
             try {
                 // Wait for 1 second.

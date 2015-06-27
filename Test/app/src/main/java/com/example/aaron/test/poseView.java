@@ -27,7 +27,9 @@ package com.example.aaron.test;
         import org.ros.node.NodeMain;
         import org.ros.node.topic.Subscriber;
         import geometry_msgs.Pose;
+        import geometry_msgs.PoseStamped;
         import geometry_msgs.Point;
+
 
 
         import org.apache.commons.logging.Log;
@@ -40,8 +42,9 @@ public class poseView<T> implements NodeMain {
 
     public String topicName;
     public String messageType;
-    public double x,y,z,k,w;
-    public Pose pose;
+    public double x,y,z,k,w,id;
+    public PoseStamped pose;
+    public float poseData[]={0,0,0,0,0};
     public Point p;
     //private MessageCallable<String, T> callable;
 
@@ -51,7 +54,7 @@ public class poseView<T> implements NodeMain {
         this.x=1;
         this.k=1;
         this.w=1;
-        messageType= geometry_msgs.Pose._TYPE;
+        messageType= geometry_msgs.PoseStamped._TYPE;
     }
 
     public void setTopicName(String topicName) {
@@ -68,9 +71,11 @@ public class poseView<T> implements NodeMain {
     public double getY(){
         return y;
     }
+    public float[] getPoseData(){return poseData;}
     public double getZ(){
         return z;
     }
+    public double getID(){return id;}
     public double getYaw(){return Math.atan2(2*(w*k),(w*w-k*k))*57.2957795;}
     public Point getP(){return p;}
     public void setX(double xx) {
@@ -92,20 +97,26 @@ public class poseView<T> implements NodeMain {
     public void onStart(ConnectedNode connectedNode) {
         x=-3;
         System.out.println("one");
-        Subscriber<geometry_msgs.Pose> subscriber = connectedNode.newSubscriber("all_positions", messageType);
+        Subscriber<geometry_msgs.PoseStamped> subscriber = connectedNode.newSubscriber("all_positions", messageType);
 
-        subscriber.addMessageListener(new MessageListener<geometry_msgs.Pose>() {
+        subscriber.addMessageListener(new MessageListener<PoseStamped>() {
             @Override
-            public void onNewMessage(geometry_msgs.Pose pose) {
+            public void onNewMessage(geometry_msgs.PoseStamped pose) {
 
                 //System.out.println("found"+pose.getPosition().getX());
                 //x=pose.getPosition().getX();
-                y=pose.getPosition().getY();
-                z=pose.getPosition().getZ();
-                p=pose.getPosition();
-                x=(pose.getPosition().getX());
-                w=pose.getOrientation().getW();
-                k=pose.getOrientation().getZ();
+                y=pose.getPose().getPosition().getY();
+                z=pose.getPose().getPosition().getZ();
+                p=pose.getPose().getPosition();
+                x=(pose.getPose().getPosition().getX());
+                w=pose.getPose().getOrientation().getW();
+                k=pose.getPose().getOrientation().getZ();
+                id=(double)pose.getHeader().getSeq();
+                poseData[0]=(float)x;
+                poseData[1]=(float)y;
+                poseData[2]=(float)z;
+                poseData[3]=(float)(Math.atan2(2*(w*k),(w*w-k*k))*57.2957795);
+                poseData[4]=(float)id;
                 /*y=pose.getPosition().getY();
                 z=pose.getPosition().getZ();*/
 
