@@ -27,11 +27,11 @@ package com.example.aaron.test;
 public class MyGLSurfaceView extends GLSurfaceView {
 
     private final MyGLRenderer mRenderer;
-    public float posTemp[];
+    public float poseData[];
 
     public MyGLSurfaceView(Context context, float f[]) {
         super(context);
-
+        poseData=f;
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
 
@@ -55,7 +55,12 @@ public class MyGLSurfaceView extends GLSurfaceView {
         // MotionEvent reports input details from the touch screen
         // and other input controls. In this case, you are only
         // interested in events where the touch position changed.
-
+        System.out.println("ID FOUND: "+poseData[0]);
+        System.out.println("ID FOUND: "+poseData[1]);
+        System.out.println("ID FOUND: "+poseData[2]);
+        System.out.println("ID FOUND: "+poseData[3]);
+        System.out.println("ID FOUND: "+poseData[4]);
+        System.out.println("ID FOUND: "+poseData[5]);
         float x = e.getX();
         float y = e.getY();
         //mRenderer.setPositon(posTemp);

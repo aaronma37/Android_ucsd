@@ -30,8 +30,8 @@ public class MainActivity extends RosActivity {
     private GLSurfaceView mGLView;
     public Intent intent;
     public double p[];
-    public float pos[]={0,0,0,0};
-    public float poseData[]={0,0,0,0,0};
+    public float pos[]={0,0,0,0,0,0};
+    public float poseData[]={0,0,0,0,0,0};
 
     //public turtle turt;
     TextView poseX;
@@ -132,12 +132,25 @@ public class MainActivity extends RosActivity {
             p[0]=poseview.getX();
             p[1]=poseview.getY();
 
-            pos[0]=(float)poseview.getX();
+            /*pos[0]=(float)poseview.getX();
             pos[1]=(float)poseview.getY();
             pos[2]=(float)poseview.getZ();
-            pos[3]=(float)poseview.getYaw();
+            pos[3]=(float)poseview.getYaw();*/
             poseData=poseview.getPoseData();
-            System.out.println("found"+poseData);
+            pos[0]=poseData[0];
+            pos[1]=poseData[1];
+            pos[2]=poseData[2];
+            pos[3]=poseData[3];
+            pos[4]=poseData[4];
+            pos[5]=poseData[5];
+            /*System.out.println("ID FOUND: "+poseData[0]);
+            System.out.println("ID FOUND: "+poseData[1]);
+            System.out.println("ID FOUND: "+poseData[2]);
+            System.out.println("ID FOUND: "+poseData[3]);
+            System.out.println("ID FOUND: "+poseData[4]);
+            System.out.println("ID FOUND: "+poseData[5]);*/
+
+
             talker.setP(p);
             try {
                 // Wait for 1 second.

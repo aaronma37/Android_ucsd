@@ -56,11 +56,11 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
-    float pos[];
+    float poseData[]={0,0,0,0,0,0};
 
     private float mAngle;
 
-    public MyGLRenderer(Context context1,float f[]){pos=f;context=context1;}
+    public MyGLRenderer(Context context1,float f[]){poseData=f;context=context1;}
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -82,7 +82,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mArena  = new Square(sTemp);
         sTemp[0]=-.64f;sTemp[1]=.98f;sTemp[3]=-.64f;sTemp[4]=-.79f;sTemp[6]=.64f;sTemp[7]=-.79f;
         sTemp[9]=.64f;sTemp[10]=.98f; c[0]=0;c[1]=0;c[2]=0;c[3]=1.0f;
-        float pos[]={0,0,0,0};
 
         mArena2  = new Square(sTemp);
         mArena2.setColor(c);
@@ -91,7 +90,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
       turt1 = new turtB(context);
     }
     public void setPosition(float f[]){
-        pos=f;
+        poseData=f;
     }
 
     @Override
@@ -133,8 +132,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
 
         // Draw triangle
         mTriangle.draw(scratch);
-        Matrix.translateM(mMVPMatrix, 0, pos[0], pos[1], pos[2]);
-        Matrix.rotateM(mMVPMatrix, 0, pos[3],0, 0, 1f);
+        Matrix.translateM(mMVPMatrix, 0, poseData[0], poseData[1], poseData[2]);
+        Matrix.rotateM(mMVPMatrix, 0, poseData[3],0, 0, 1f);
 
         //Matrix.setLookAtM(scratch, 0, 0f, 0f, 1f, 0,0,0,.2f,0,1f);
         //robot.draw(mMVPMatrix);

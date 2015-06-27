@@ -41,10 +41,10 @@ package com.example.aaron.test;
 public class poseView<T> implements NodeMain {
 
     public String topicName;
-    public String messageType;
+    public String messageType,frame_id;
     public double x,y,z,k,w,id;
     public PoseStamped pose;
-    public float poseData[]={0,0,0,0,0};
+    public float poseData[]={0,0,0,0,0,0};
     public Point p;
     //private MessageCallable<String, T> callable;
 
@@ -112,11 +112,14 @@ public class poseView<T> implements NodeMain {
                 w=pose.getPose().getOrientation().getW();
                 k=pose.getPose().getOrientation().getZ();
                 id=(double)pose.getHeader().getSeq();
+                frame_id=pose.getHeader().getFrameId();
                 poseData[0]=(float)x;
                 poseData[1]=(float)y;
                 poseData[2]=(float)z;
                 poseData[3]=(float)(Math.atan2(2*(w*k),(w*w-k*k))*57.2957795);
                 poseData[4]=(float)id;
+                if (frame_id.equals("Bob")){poseData[5]=1;}else{poseData[5]=2;}
+
                 /*y=pose.getPosition().getY();
                 z=pose.getPosition().getZ();*/
 
