@@ -1,31 +1,56 @@
 package com.example.aaron.test;
 
-        import geometry_msgs.Point;
-        import geometry_msgs.Pose;
-
-//target speed 0.5 m/s
-
 public class turtle {
-    private Pose pose = null;
+    public float x=0;
+    public float y=0;
+    public float z=0;
+    public float rot=0;
+    public float data[]={0,0,0};
+    public float nameID=0;
+    public int state=0;
+    public int on=0;
 
     public turtle() {
-        super();
+        x=0;y=0;rot=0;z=0;state=0;on=0;
     }
 
-    public Pose getPose() {
-        //if ( pose == null )
-            //pose=ApplicationContext.newInstance(Pose.class, Pose._TYPE);
-        return pose;
+    public int getState(){return state;}
+
+    public void setState(int i){state=i;}
+
+    public float getX() {
+        return x;
     }
 
-    public void setPose(Pose pose) {
-        this.pose = pose;
+    public float getY() {
+        return y;
     }
 
-    public void setLocation(Point currentPoint) {
-        pose.setPosition(currentPoint);
+    public float getRot() {
+        return rot;
     }
 
-    public void resetGlobalYaw() {
+    public int getOn(){
+        return on;
+    }
+
+    public void setOn(int s){
+        on=s;
+    }
+
+    public float[] getData(){
+        float data[]={x,y,z,rot,nameID, state,on};
+        return data;
+    }
+
+
+    public void setData(float[] f) {
+        x=f[0];
+        y=f[1];
+        z=f[2];
+        rot=f[3];
+        nameID=f[4];
+        state=(int)f[5];
+        on=(int)f[6];
     }
 }

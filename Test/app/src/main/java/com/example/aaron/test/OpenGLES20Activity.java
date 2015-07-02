@@ -28,10 +28,12 @@ public class OpenGLES20Activity extends Activity {
             String value = extras.getString("new_variable_name");
         }
         float pos[]= extras.getFloatArray("position");
+        turtle turtleList[] = new turtle[10];
+
 
         // Create a GLSurfaceView instance and set it
         // as the ContentView for this Activity.
-        mGLView = new MyGLSurfaceView(this,pos);
+        mGLView = new MyGLSurfaceView(this,pos,turtleList);
         final ActivityManager activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         final ConfigurationInfo configurationInfo = activityManager.getDeviceConfigurationInfo();
         final boolean supportsEs2 = configurationInfo.reqGlEsVersion >= 0x20000;

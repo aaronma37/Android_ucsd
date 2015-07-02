@@ -42,6 +42,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Triangle mTriangle, robot;
     private Square   mSquare, mArena, mArena2;
     private turtB turt1;
+    private target tar;
+    private gauss density;
     private FloatBuffer textureBuffer;
     public Context context;
     private float texture[] = {
@@ -56,11 +58,33 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
     private final float[] mRotationMatrix = new float[16];
-    float poseData[]={0,0,0,0,0,0};
+    float poseData[]={0,0,0,0,0};
+    public turtle turtleList[]= new turtle[10];
+    private float tempX;
+    private float tempY;
+    private float width,height;
 
     private float mAngle;
 
-    public MyGLRenderer(Context context1,float f[]){poseData=f;context=context1;}
+    public MyGLRenderer(Context context1,float f[], turtle t[],float w, float h){
+        width=w;
+        height=h;
+        poseData=f;context=context1;
+    for (int i=0;i<10;i++){
+        turtleList[i]=new turtle();
+        if (t[i]!=null){
+        turtleList[i].setData(t[i].getData());}
+    }
+
+
+    }
+
+    public void updateRen(turtle t[]){
+        for (int i=0;i<10;i++){
+            if (t[i]!=null){
+                turtleList[i].setData(t[i].getData());}
+        }
+    }
 
     @Override
     public void onSurfaceCreated(GL10 unused, EGLConfig config) {
@@ -77,17 +101,21 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                 0.5f,  0.5f, 0.0f };
         float c[] = { 0f,255f,255f, 1.0f };
         mSquare   = new Square();
-        sTemp[0]=-.65f;sTemp[1]=.99f;sTemp[3]=-.65f;sTemp[4]=-.80f;sTemp[6]=.65f;sTemp[7]=-.80f;
-        sTemp[9]=.65f;sTemp[10]=.99f;
+        sTemp[0]=-width/height;sTemp[1]=height/height;sTemp[3]=-width/height;;sTemp[4]=-height/height;sTemp[6]=width/height;;sTemp[7]=-height/height;
+        sTemp[9]=width/height;sTemp[10]=height/height;
         mArena  = new Square(sTemp);
-        sTemp[0]=-.64f;sTemp[1]=.98f;sTemp[3]=-.64f;sTemp[4]=-.79f;sTemp[6]=.64f;sTemp[7]=-.79f;
-        sTemp[9]=.64f;sTemp[10]=.98f; c[0]=0;c[1]=0;c[2]=0;c[3]=1.0f;
+        sTemp[0]=-(width-100)/height;sTemp[1]=(height-5)/height;sTemp[3]=-(width-100)/height;sTemp[4]=-(height-5)/height;sTemp[6]=(width-100)/height;;sTemp[7]=-(height-5)/height;
+        sTemp[9]=(width-100)/height;sTemp[10]=(height-5)/height;
+
+        c[0]=0;c[1]=0;c[2]=0;c[3]=1.0f;
 
         mArena2  = new Square(sTemp);
         mArena2.setColor(c);
         robot = new Triangle();
         //turtle1 = new turtleB(mActivityContext)
-      turt1 = new turtB(context);
+        turt1 = new turtB(context);
+        tar =new target(context);
+        //density = new gauss(context);
     }
     public void setPosition(float f[]){
         poseData=f;
@@ -96,8 +124,6 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 unused) {
         float[] scratch = new float[16];
-
-
 
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
@@ -111,34 +137,34 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw square
         mArena.draw(mMVPMatrix);
         mArena2.draw(mMVPMatrix);
-
-
-
-
-
-        // Create a rotation for the triangle
-
-        // Use the following code to generate constant rotation.
-        // Leave this code out when using TouchEvents.
-        // long time = SystemClock.uptimeMillis() % 4000L;
-        // float angle = 0.090f * ((int) time);
-
+        //density.Draw(mMVPMatrix);
+        for (int i=0;i<10;i++){
+            if (turtleList[i].getOn()==1) {
+                Matrix.setRotateM(mRotationMatrix, 0, 0, 0, 0, 1.0f);
+                Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+                Matrix.translateM(scratch, 0, turtleList[i].getX(), turtleList[i].getY(), 0);
+                Matrix.rotateM(scratch, 0, turtleList[i].getRot(), 0, 0, 1f);
+                turt1.Draw(scratch,turtleList[i].getState());
+            }
+        }
+        /*scratch = new float[16];
         Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
-
-        // Combine the rotation matrix with the projection and camera view
-        // Note that the mMVPMatrix factor *must be first* in order
-        // for the matrix multiplication product to be correct.
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+        mTriangle.draw(scratch);*/
 
-        // Draw triangle
-        mTriangle.draw(scratch);
-        Matrix.translateM(mMVPMatrix, 0, poseData[0], poseData[1], poseData[2]);
-        Matrix.rotateM(mMVPMatrix, 0, poseData[3],0, 0, 1f);
+        Matrix.setRotateM(mRotationMatrix, 0, 0, 0, 0, 1.0f);
+        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+        Matrix.translateM(scratch, 0, tempX, tempY, 0);
+        tar.Draw(scratch);
 
-        //Matrix.setLookAtM(scratch, 0, 0f, 0f, 1f, 0,0,0,.2f,0,1f);
-        //robot.draw(mMVPMatrix);
-        turt1.Draw(mMVPMatrix);
 
+
+
+    }
+
+    public void tempFun(float xx, float yy){
+        tempX  =xx;
+        tempY  =yy;
     }
 
     @Override

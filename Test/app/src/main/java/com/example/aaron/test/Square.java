@@ -48,6 +48,8 @@ public class Square {
                     "  gl_FragColor = vColor;" +
                     "}";
 
+
+
     private final FloatBuffer vertexBuffer;
     private final ShortBuffer drawListBuffer;
     private final int mProgram;

@@ -15,7 +15,7 @@ import javax.microedition.khronos.opengles.GL10;
 
 /**
  * Created by aaron on 6/16/15.
- */public class turtB
+ */public class gauss
 {
     //Reference to Activity Context
     private final Context mActivityContext;
@@ -25,7 +25,7 @@ import javax.microedition.khronos.opengles.GL10;
     private int mTextureUniformHandle;
     private int mTextureCoordinateHandle;
     private final int mTextureCoordinateDataSize = 2;
-    private int mTextureDataHandle, selectedTextureDataHandle;
+    private int mTextureDataHandle;
 
     private final String vertexShaderCode =
 //Test
@@ -63,10 +63,10 @@ import javax.microedition.khronos.opengles.GL10;
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 2;
     static float spriteCoords[] = {
-            -0.05f,  0.05f,   // top left
-            -0.05f, -0.05f,   // bottom left
-            0.05f, -0.05f,   // bottom right
-            0.05f,  0.05f}; //top right
+            -0.2f,  0.2f,   // top left
+            -0.2f, -0.2f,   // bottom left
+            0.2f, -0.2f,   // bottom right
+            0.2f,  0.2f}; //top right
 
     private short drawOrder[] = { 0, 1, 2, 0, 2, 3 }; //Order to draw vertices
     private final int vertexStride = COORDS_PER_VERTEX * 4; //Bytes per vertex
@@ -74,7 +74,7 @@ import javax.microedition.khronos.opengles.GL10;
     // Set color with red, green, blue and alpha (opacity) values
     float color[] = { 255f, 255f, 255f, 1.0f };
 
-    public turtB(final Context activityContext)
+    public gauss(final Context activityContext)
     {
         mActivityContext = activityContext;
 
@@ -105,7 +105,7 @@ import javax.microedition.khronos.opengles.GL10;
             1.0f, 0.0f*/
 
                         0f,  1f,
-                       1f, 1f,
+                        1f, 1f,
                         1f, 0f,
                         0f, 0f
                 };
@@ -133,12 +133,12 @@ import javax.microedition.khronos.opengles.GL10;
         GLES20.glLinkProgram(shaderProgram);
 
         //Load the texture
-        mTextureDataHandle = loadTexture(mActivityContext, R.drawable.turtlebot);
-        selectedTextureDataHandle = loadTexture(mActivityContext,R.drawable.turtlebot_selected);
+        mTextureDataHandle = loadTexture(mActivityContext, R.drawable.gauss);
     }
 
-    public void Draw(float[] mvpMatrix, int s)
+    public void Draw(float[] mvpMatrix)
     {
+        //Add program to OpenGL ES Environment
         GLES20.glUseProgram(shaderProgram);
 
         //Get handle to vertex shader's vPosition member
@@ -164,12 +164,7 @@ import javax.microedition.khronos.opengles.GL10;
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
         //Bind the texture to this unit.
-
-        if (s==1){
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, selectedTextureDataHandle);}
-        else{
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureDataHandle);
-        }
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, mTextureDataHandle);
 
         //Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
         GLES20.glUniform1i(mTextureUniformHandle, 0);
@@ -189,8 +184,8 @@ import javax.microedition.khronos.opengles.GL10;
         //Draw the triangle
         GLES20.glDrawElements(GLES20.GL_TRIANGLES, drawOrder.length, GLES20.GL_UNSIGNED_SHORT, drawListBuffer);
 
-                //Disable Vertex Array
-                GLES20.glDisableVertexAttribArray(mPositionHandle);
+        //Disable Vertex Array
+        GLES20.glDisableVertexAttribArray(mPositionHandle);
 
 
     }

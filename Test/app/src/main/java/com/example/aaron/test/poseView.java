@@ -44,8 +44,9 @@ public class poseView<T> implements NodeMain {
     public String messageType,frame_id;
     public double x,y,z,k,w,id;
     public PoseStamped pose;
-    public float poseData[]={0,0,0,0,0,0};
+    public float poseData[]={0,0,0,0,0,0,0};
     public Point p;
+    public turtle turtleList[]=new turtle[10];
     //private MessageCallable<String, T> callable;
 
     public poseView() {
@@ -55,11 +56,14 @@ public class poseView<T> implements NodeMain {
         this.k=1;
         this.w=1;
         messageType= geometry_msgs.PoseStamped._TYPE;
+        for (int i=0;i<10;i++){
+            turtleList[i]=new turtle();
+        }
     }
 
-    public void setTopicName(String topicName) {
-        this.topicName = topicName;
-    }
+   public turtle[] getTurtles(){
+       return turtleList;
+   }
 
     public void setMessageType(String messageType) {
         this.messageType = messageType;
@@ -96,7 +100,6 @@ public class poseView<T> implements NodeMain {
     @Override
     public void onStart(ConnectedNode connectedNode) {
         x=-3;
-        System.out.println("one");
         Subscriber<geometry_msgs.PoseStamped> subscriber = connectedNode.newSubscriber("all_positions", messageType);
 
         subscriber.addMessageListener(new MessageListener<PoseStamped>() {
@@ -117,32 +120,13 @@ public class poseView<T> implements NodeMain {
                 poseData[1]=(float)y;
                 poseData[2]=(float)z;
                 poseData[3]=(float)(Math.atan2(2*(w*k),(w*w-k*k))*57.2957795);
-                poseData[4]=(float)id;
-                if (frame_id.equals("Bob")){poseData[5]=1;}else{poseData[5]=2;}
+                poseData[5]=0;
+                if (frame_id.equals("Bob")){poseData[4]=1;}else if(frame_id.equals("Frank")){poseData[4]=2;}
+                else{poseData[4]=-1;}
+                poseData[6]=1;
+                turtleList[(int)poseData[4]].setData(poseData);
 
-                /*y=pose.getPosition().getY();
-                z=pose.getPosition().getZ();*/
 
-               /* setOrientation(pose.getOrientation());
-                setPosition(pose.getPosition());*/
-
-                /*if (callable != null) {
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            setOrientation(callable.call(message));
-                            setPosition(callable.call(message));
-                        }
-                    });
-                } else {
-                    post(new Runnable() {
-                        @Override
-                        public void run() {
-                            set(message.toString());
-                        }
-                    });
-                }
-                postInvalidate();*/
             }
         });
     }

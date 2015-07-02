@@ -1,20 +1,26 @@
 package com.example.aaron.test;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
+import android.view.WindowManager;
 import android.widget.TextView;
 
 import org.ros.address.InetAddressFactory;
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
 import org.ros.android.view.RosTextView;
+import org.ros.node.ConnectedNode;
 import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import geometry_msgs.Point;
 import geometry_msgs.Pose;
 import com.example.aaron.test.Talker;
 
+import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 //import org.ros.rosjava_tutorial_pubsub.Talker;
 
@@ -27,12 +33,14 @@ public class MainActivity extends RosActivity {
     private RosTextView<std_msgs.String> rosTextView;
     private Talker talker;
     private poseView poseview;
-    private GLSurfaceView mGLView;
+    private MyGLSurfaceView mGLView;
     public Intent intent;
     public double p[];
-    public float pos[]={0,0,0,0,0,0};
-    public float poseData[]={0,0,0,0,0,0};
-
+    public float pos[]={0,0,0,0,0};
+    public float poseData[]={0,0,0,0,0};
+    public turtle[] turtleList=new turtle[10];
+    public View decorView;
+    private int currentApiVersion;
     //public turtle turt;
     TextView poseX;
 
@@ -49,7 +57,49 @@ public class MainActivity extends RosActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        final int flags = View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY;
+        currentApiVersion = android.os.Build.VERSION.SDK_INT;
+        // This work only for android 4.4+
+
+
+        if(currentApiVersion >= Build.VERSION_CODES.KITKAT)
+        {
+
+            getWindow().getDecorView().setSystemUiVisibility(flags);
+
+            // Code below is to handle presses of Volume up or Volume down.
+            // Without this, after pressing volume buttons, the navigation bar will
+            // show up and won't hide
+            final View decorView = getWindow().getDecorView();
+            decorView
+                    .setOnSystemUiVisibilityChangeListener(new View.OnSystemUiVisibilityChangeListener()
+                    {
+
+                        @Override
+                        public void onSystemUiVisibilityChange(int visibility)
+                        {
+                            if((visibility & View.SYSTEM_UI_FLAG_FULLSCREEN) == 0)
+                            {
+                                decorView.setSystemUiVisibility(flags);
+                            }
+                        }
+                    });
+        }
+
+
+
         setContentView(R.layout.activity_main);
+        View decorView = getWindow().getDecorView();
+
+
+
        // poseview.setTopicName("all_positions");
         rosTextView = (RosTextView<std_msgs.String>) findViewById(R.id.text);
         rosTextView.setTopicName("chatter");
@@ -82,18 +132,38 @@ public class MainActivity extends RosActivity {
 
             // Create a GLSurfaceView instance and set it
             // as the ContentView for this Activity.
-        mGLView = new MyGLSurfaceView(this, pos);
-        setContentView(mGLView);
 
+        mGLView = new MyGLSurfaceView(this, pos,turtleList);
+        setContentView(mGLView);
+        for (int i=0;i<10;i++){
+            turtleList[i]=new turtle();
+        }
 
     }
 
+    @SuppressLint("NewApi")
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus)
+    {
+        super.onWindowFocusChanged(hasFocus);
+        if(currentApiVersion >= Build.VERSION_CODES.KITKAT && hasFocus)
+        {
+            getWindow().getDecorView().setSystemUiVisibility(
+                    View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                            | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                            | View.SYSTEM_UI_FLAG_FULLSCREEN
+                            | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
+        }
+    }
 
     @Override
     protected void init(NodeMainExecutor nodeMainExecutor) {
         double num=1;
         talker = new Talker(num);
         poseview = new poseView();
+
 
         //poseview.setMessageType(std_msgs.String._TYPE);
         /*Pose x= poseimporter.turt.getPose();
@@ -125,72 +195,69 @@ public class MainActivity extends RosActivity {
         num=poseview.getX();
         talker.setNum(num);
         nodeMainExecutor.execute(talker, nodeConfiguration);
+        ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(5);
 
-        for (int k=1;k<100000;k++){
+
+        exec.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+
+
+                /*poseData = poseview.getPoseData();
+               pos[0] = poseData[0];
+                pos[1] = poseData[1];
+                pos[2] = poseData[2];
+                pos[3] = poseData[3];
+                pos[4] = poseData[4];*/
+
+                //turtleList[(int) poseData[4]].setData(poseData);
+                turtleList=poseview.getTurtles();
+                mGLView.updateRen(turtleList);
+            }
+        }, 0, 100, TimeUnit.MICROSECONDS);
+
+        /*
+        long period = 100; // the period between successive executions
+        exec.scheduleAtFixedRate(new MyTask(), 0, period, TimeUnit.MICROSECONDS);
+        long delay = 100; //the delay between the termination of one execution and the commencement of the next
+        exec.scheduleWithFixedDelay(new MyTask(), 0, delay, TimeUnit.MICROSECONDS);*/
+
+
+        /*while (1==1){
+
             num=poseview.getX();
             double p[]={0,0,0,0};
             p[0]=poseview.getX();
             p[1]=poseview.getY();
 
-            /*pos[0]=(float)poseview.getX();
+            *//*pos[0]=(float)poseview.getX();
             pos[1]=(float)poseview.getY();
             pos[2]=(float)poseview.getZ();
-            pos[3]=(float)poseview.getYaw();*/
+            pos[3]=(float)poseview.getYaw();*//*
             poseData=poseview.getPoseData();
             pos[0]=poseData[0];
             pos[1]=poseData[1];
             pos[2]=poseData[2];
             pos[3]=poseData[3];
             pos[4]=poseData[4];
-            pos[5]=poseData[5];
-            /*System.out.println("ID FOUND: "+poseData[0]);
+
+            turtleList[(int)poseData[4]].setData(poseData);
+            mGLView.updateRen(turtleList);
+            *//*System.out.println("ID FOUND: "+turtleList[0].getRot());
             System.out.println("ID FOUND: "+poseData[1]);
             System.out.println("ID FOUND: "+poseData[2]);
             System.out.println("ID FOUND: "+poseData[3]);
             System.out.println("ID FOUND: "+poseData[4]);
-            System.out.println("ID FOUND: "+poseData[5]);*/
+            System.out.println("ID FOUND: "+poseData[5]);*//*
 
 
             talker.setP(p);
             try {
                 // Wait for 1 second.
                 Thread.sleep(1);
-            }
-            catch (InterruptedException ex) {}
-        }
-
-        /*intent = new Intent(MainActivity.this, OpenGLES20Activity.class);
-        intent.putExtra("positon", pos);
-        startActivity(intent);
-        for (int k=1;k<100;k++){
-            pos[0]=(float)poseview.getX();
-            pos[1]=(float)poseview.getY();
-            pos[2]=(float)poseview.getZ();
-            intent.putExtra("position", pos);
-            //p=poseview.getP();
-            try {
-                // Wait for 1 second.
-                Thread.sleep(100);
+                //wait();
             }
             catch (InterruptedException ex) {}
         }*/
-
-
-
-        //}
-
-
-
-        /*runOnUiThread(new Runnable() {
-
-            double t = poseview.getX();
-            String xString = String.valueOf(t);
-            TextView poseX = (TextView) findViewById(R.id.poseX);
-
-            public void run() {
-                poseX.setText(xString);
-            }
-        });*/
     }
 
 }

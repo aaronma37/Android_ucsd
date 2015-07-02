@@ -15,9 +15,16 @@ package com.example.aaron.test;
  * limitations under the License.
  */
 
+        import android.app.Activity;
+        import com.example.aaron.simplevoronoi.src.main.java.be.humphreys.simplevoronoi.*;
         import android.content.Context;
+        import android.graphics.Point;
         import android.opengl.GLSurfaceView;
+        import android.util.DisplayMetrics;
+        import android.view.Display;
         import android.view.MotionEvent;
+        import android.view.View;
+        import android.view.WindowManager;
 
 /**
  * A view container where OpenGL ES graphics can be drawn on screen.
@@ -28,21 +35,52 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     private final MyGLRenderer mRenderer;
     public float poseData[];
-
-    public MyGLSurfaceView(Context context, float f[]) {
+    public turtle tList[]=new turtle[10];
+    private float width1;
+    private float height1;
+    public Voronoi vor;
+    private int state[]= {0,0,0,0,0,0,0,0,0,0,0};
+    public MyGLSurfaceView(Context context, float f[], turtle turtleList[]) {
         super(context);
+
+
+
+
+        vor = new Voronoi(.01);
+        DisplayMetrics metrics = new DisplayMetrics();
+        ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        width1 = metrics.widthPixels;
+        height1 = metrics.heightPixels;
+
         poseData=f;
         // Create an OpenGL ES 2.0 context.
         setEGLContextClientVersion(2);
+        for (int i=0;i<10;i++){
+            tList[i]=new turtle();
+        }
 
         // Set the Renderer for drawing on the GLSurfaceView
-        mRenderer = new MyGLRenderer(context,f);
+        mRenderer = new MyGLRenderer(context,f, tList,width1,height1);
         //float posTemp[]=f;
         setRenderer(mRenderer);
 
         // Render the view only when there is a change in the drawing data
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+
     }
+
+    public void updateRen(turtle[] t){
+        for (int i=0;i<10;i++) {
+            if (t[i] != null) {
+                float temp[]=t[i].getData();
+                temp[5]=state[i];
+                tList[i].setData(temp);
+            }
+        }
+
+        mRenderer.updateRen(tList);
+    }
+
 
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private float mPreviousX;
@@ -52,19 +90,47 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
     @Override
     public boolean onTouchEvent(MotionEvent e) {
-        // MotionEvent reports input details from the touch screen
-        // and other input controls. In this case, you are only
-        // interested in events where the touch position changed.
-        System.out.println("ID FOUND: "+poseData[0]);
-        System.out.println("ID FOUND: "+poseData[1]);
-        System.out.println("ID FOUND: "+poseData[2]);
-        System.out.println("ID FOUND: "+poseData[3]);
-        System.out.println("ID FOUND: "+poseData[4]);
-        System.out.println("ID FOUND: "+poseData[5]);
+
         float x = e.getX();
         float y = e.getY();
         //mRenderer.setPositon(posTemp);
+        int cc=0;
+
+
+        float xGL=(width1/2-x)/(float)(height1/1.85);
+        float yGL=( height1/2+85-y)/(float)(height1/1.85);
+
+        mRenderer.tempFun(xGL, yGL);
+
+
+
+        
+
+
+        vor.generateVoronoi([(double)tList[0].getX() ])
+
+
+        System.out.println("turtleLocation: "+tList[1].getX());
         switch (e.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                for (int i=0;i<10;i++){
+                    if(tList[i].getOn()==1) {
+                        cc=cc+1;
+                        if (Math.abs(tList[i].getX() - xGL) < .1f && Math.abs(tList[i].getY() - yGL) < .1f) {
+                            System.out.println("Turtle Press");
+                            if (state[i] == 0) {
+                                state[i]=1;
+                            } else {
+                                state[i]=0;
+                            }
+                        }
+                    }
+
+                }
+
+
+
+
             case MotionEvent.ACTION_MOVE:
 
                 float dx = x - mPreviousX;
