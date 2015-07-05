@@ -121,7 +121,10 @@ public class poseView<T> implements NodeMain {
                 poseData[2]=(float)z;
                 poseData[3]=(float)(Math.atan2(2*(w*k),(w*w-k*k))*57.2957795);
                 poseData[5]=0;
-                if (frame_id.equals("Bob")){poseData[4]=1;}else if(frame_id.equals("Frank")){poseData[4]=2;}
+                if (frame_id.equals("Bob")){poseData[4]=0;}else if(frame_id.equals("Frank")){poseData[4]=1;}
+                else if(frame_id.equals("Eric")){poseData[4]=4;}
+                else if(frame_id.equals("Aaron")){poseData[4]=3;}
+                else if(frame_id.equals("Richard")){poseData[4]=2;}
                 else{poseData[4]=-1;}
                 poseData[6]=1;
                 turtleList[(int)poseData[4]].setData(poseData);

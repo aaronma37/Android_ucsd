@@ -50,12 +50,13 @@ public class Square {
 
 
 
-    private final FloatBuffer vertexBuffer;
+    public FloatBuffer vertexBuffer;
     private final ShortBuffer drawListBuffer;
     private final int mProgram;
     private int mPositionHandle;
     private int mColorHandle;
     private int mMVPMatrixHandle;
+    private int counter=0;
 
     // number of coordinates per vertex in this array
     static final int COORDS_PER_VERTEX = 3;
@@ -69,7 +70,7 @@ public class Square {
 
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
 
-    float color[] = { 0.2f, 0.709803922f, 0.898039216f, 1.0f };
+    float color[] = { 0, 255f, 255f, 1.0f };
 
     /**
      * Sets up the drawing object data for use in an OpenGL ES context.
@@ -78,7 +79,7 @@ public class Square {
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)
-                squareCoords.length * 4);
+                100000);
         bb.order(ByteOrder.nativeOrder());
         vertexBuffer = bb.asFloatBuffer();
         vertexBuffer.put(squareCoords);
@@ -113,7 +114,7 @@ public class Square {
         // initialize vertex byte buffer for shape coordinates
         ByteBuffer bb = ByteBuffer.allocateDirect(
                 // (# of coordinate values * 4 bytes per float)
-                squareCoords.length * 4);
+                100000);
         bb.order(ByteOrder.nativeOrder());
         vertexBuffer = bb.asFloatBuffer();
         vertexBuffer.put(squareCoords);
@@ -142,6 +143,14 @@ public class Square {
         GLES20.glLinkProgram(mProgram);                  // create OpenGL program executables
     }
 
+
+    public void setSquareCoords(float s[]){
+        squareCoords=s;
+        vertexBuffer.allocate(12);
+        vertexBuffer.put(squareCoords);
+        vertexBuffer.position(0);
+    }
+
     public void setColor(float c[]){color=c;}
     /**
      * Encapsulates the OpenGL ES instructions for drawing this shape.
@@ -164,7 +173,7 @@ public class Square {
         GLES20.glVertexAttribPointer(
                 mPositionHandle, COORDS_PER_VERTEX,
                 GLES20.GL_FLOAT, false,
-                vertexStride, vertexBuffer);
+                vertexStride,vertexBuffer);
 
         // get handle to fragment shader's vColor member
         mColorHandle = GLES20.glGetUniformLocation(mProgram, "vColor");

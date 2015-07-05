@@ -26,6 +26,12 @@ package com.example.aaron.test;
         import android.view.View;
         import android.view.WindowManager;
 
+        import java.util.ArrayList;
+        import java.util.List;
+        import java.util.concurrent.ScheduledThreadPoolExecutor;
+        import java.util.concurrent.TimeUnit;
+
+
 /**
  * A view container where OpenGL ES graphics can be drawn on screen.
  * This view can also be used to capture touch events, such as a user
@@ -38,7 +44,16 @@ public class MyGLSurfaceView extends GLSurfaceView {
     public turtle tList[]=new turtle[10];
     private float width1;
     private float height1;
+    public int vFlag=0;
+    ArrayList<Double> temp= new ArrayList<Double>();
+    ArrayList<Double> temp2= new ArrayList<Double>();
+
+
+    /*private double temp[]=new double[10];
+    private double temp2[]=new double[10];*/
+
     public Voronoi vor;
+    private List<GraphEdge> voronoiEdges;
     private int state[]= {0,0,0,0,0,0,0,0,0,0,0};
     public MyGLSurfaceView(Context context, float f[], turtle turtleList[]) {
         super(context);
@@ -46,7 +61,7 @@ public class MyGLSurfaceView extends GLSurfaceView {
 
 
 
-        vor = new Voronoi(.01);
+        vor = new Voronoi(.001);
         DisplayMetrics metrics = new DisplayMetrics();
         ((Activity) getContext()).getWindowManager().getDefaultDisplay().getMetrics(metrics);
         width1 = metrics.widthPixels;
@@ -81,6 +96,88 @@ public class MyGLSurfaceView extends GLSurfaceView {
         mRenderer.updateRen(tList);
     }
 
+    public float getHeight1(){
+        return height1;
+    }
+
+    public float getWidth1(){
+        return width1;
+    }
+
+    public void setVoronoiCoordinates(){
+
+        float vorCoords[] = {
+                -0.5f,  0.5f, 0.0f,   // top left
+                -0.5f, -0.5f, 0.0f,   // bottom left
+                0.5f, -0.5f, 0.0f,   // bottom right
+                0.5f,  0.5f, 0.0f }; // top right
+
+        temp.clear();
+        temp2.clear();
+        for (int i=0;i<10;i++){
+            if (tList[i].getOn()==1) {
+                temp.add((double) tList[i].getX());
+                temp2.add((double) tList[i].getY());
+            }
+        }
+        if (temp!=null) {
+
+
+        double[] temp3 = new double[temp.size()];
+        double[] temp4 = new double[temp.size()];
+        for (int i=0;i<temp.size();i++){
+            temp3[i]=temp.get(i);
+            temp4[i]=temp2.get(i);
+        }
+
+
+            voronoiEdges = vor.generateVoronoi(temp3, temp4, -width1 / height1, width1 / height1, -height1 / (height1 * 2), height1 / height1);
+
+        for(int i = 0; i < voronoiEdges.size(); i++) {
+            System.out.println("Voronoi List:");
+            System.out.println(voronoiEdges.get(i).x1);
+            System.out.println(voronoiEdges.get(i).y1);
+            System.out.println(voronoiEdges.get(i).x2);
+            System.out.println(voronoiEdges.get(i).y2);
+
+
+            double cd = Math.cos(Math.atan((voronoiEdges.get(i).x1 - voronoiEdges.get(i).x2) / (voronoiEdges.get(i).y1 - voronoiEdges.get(i).y2)));
+            double cy = Math.sin(Math.atan((voronoiEdges.get(i).x1 - voronoiEdges.get(i).x2) / (voronoiEdges.get(i).y1 - voronoiEdges.get(i).y2)));
+
+            vorCoords[0] = (float) voronoiEdges.get(i).x1 + (float) cd * .005f;
+            vorCoords[1] = (float) voronoiEdges.get(i).y1 - (float) cy * .005f;
+
+            vorCoords[9] = (float) voronoiEdges.get(i).x2 + (float) cd * .005f;
+            vorCoords[10] = (float) voronoiEdges.get(i).y2 - (float) cy * .005f;
+
+
+            vorCoords[3] = (float) voronoiEdges.get(i).x1 - (float) cd * .005f;
+            vorCoords[4] = (float) voronoiEdges.get(i).y1 + (float) cy * .005f;
+
+            vorCoords[6] = (float) voronoiEdges.get(i).x2 - (float) cd * .005f;
+            vorCoords[7] = (float) voronoiEdges.get(i).y2 + (float) cy * .005f;
+
+
+            /*if ((vorCoords[0]-vorCoords[9])/(vorCoords[1]-vorCoords[10])<0) {
+                vorCoords[3] = (float) voronoiEdges.get(i).x1 + .01f;
+                vorCoords[4] = (float) voronoiEdges.get(i).y1 + .01f;
+
+                vorCoords[6] = (float) voronoiEdges.get(i).x2 + .01f;
+                vorCoords[7] = (float) voronoiEdges.get(i).y2 + .01f;
+            }
+            else{
+                vorCoords[3] = (float) voronoiEdges.get(i).x1 - .01f;
+                vorCoords[4] = (float) voronoiEdges.get(i).y1 + .01f;
+
+                vorCoords[6] = (float) voronoiEdges.get(i).x2 - .01f;
+                vorCoords[7] = (float) voronoiEdges.get(i).y2 + .01f;
+            }*/
+
+            mRenderer.setVoronoiCoordinates(vorCoords, i, voronoiEdges.size());
+        }
+        }
+    }
+
 
     private final float TOUCH_SCALE_FACTOR = 180.0f / 320;
     private float mPreviousX;
@@ -95,19 +192,37 @@ public class MyGLSurfaceView extends GLSurfaceView {
         float y = e.getY();
         //mRenderer.setPositon(posTemp);
         int cc=0;
-
+        vFlag=1;
 
         float xGL=(width1/2-x)/(float)(height1/1.85);
         float yGL=( height1/2+85-y)/(float)(height1/1.85);
 
         mRenderer.tempFun(xGL, yGL);
 
+        setVoronoiCoordinates();
+        /*for (int i=0;i<5;i++){
+            temp[i]=tList[i].getX();
+            temp2[i]=tList[i].getY();
+        }*/
+
+        /*double temp[]={tList[0].getX(), tList[1].getX(),tList[2].getX(),tList[3].getX(),tList[4].getX(),};
+        double temp2[] ={tList[0].getY(), tList[1].getY(),tList[2].getY(),tList[3].getY(),tList[4].getY(),};*/
 
 
-        
 
 
-        vor.generateVoronoi([(double)tList[0].getX() ])
+
+
+
+
+
+
+
+
+
+
+
+
 
 
         System.out.println("turtleLocation: "+tList[1].getX());
@@ -160,3 +275,4 @@ public class MyGLSurfaceView extends GLSurfaceView {
     public void rr(){requestRender();}
 
 }
+

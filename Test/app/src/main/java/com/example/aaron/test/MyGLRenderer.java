@@ -41,11 +41,13 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private static final String TAG = "MyGLRenderer";
     private Triangle mTriangle, robot;
     private Square   mSquare, mArena, mArena2;
+    private Square vLine[] = new Square[25];
     private turtB turt1;
     private target tar;
     private gauss density;
     private FloatBuffer textureBuffer;
     public Context context;
+    private int vSize=0;
     private float texture[] = {
             0.0f, 1.0f,     // top left     (V2)
             0.0f, 0.0f,     // bottom left  (V1)
@@ -101,10 +103,14 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                 0.5f,  0.5f, 0.0f };
         float c[] = { 0f,255f,255f, 1.0f };
         mSquare   = new Square();
-        sTemp[0]=-width/height;sTemp[1]=height/height;sTemp[3]=-width/height;;sTemp[4]=-height/height;sTemp[6]=width/height;;sTemp[7]=-height/height;
+        sTemp[0]=-width/height;sTemp[1]=height/height;
+        sTemp[3]=-width/height;;sTemp[4]=-height/(height*2);
+        sTemp[6]=width/height;;sTemp[7]=-height/(height*2);
         sTemp[9]=width/height;sTemp[10]=height/height;
         mArena  = new Square(sTemp);
-        sTemp[0]=-(width-100)/height;sTemp[1]=(height-5)/height;sTemp[3]=-(width-100)/height;sTemp[4]=-(height-5)/height;sTemp[6]=(width-100)/height;;sTemp[7]=-(height-5)/height;
+        sTemp[0]=-(width-100)/height;sTemp[1]=(height-5)/height;
+        sTemp[3]=-(width-100)/height;sTemp[4]=-(height-10)/(height*2);
+        sTemp[6]=(width-100)/height;;sTemp[7]=-(height-10)/(height*2);
         sTemp[9]=(width-100)/height;sTemp[10]=(height-5)/height;
 
         c[0]=0;c[1]=0;c[2]=0;c[3]=1.0f;
@@ -116,7 +122,25 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         turt1 = new turtB(context);
         tar =new target(context);
         //density = new gauss(context);
+
+
+        sTemp[0]=-(width-100)/height;sTemp[1]=0;
+        sTemp[3]=-(width-100)/height;sTemp[4]=-.01f;
+        sTemp[6]=(width-100)/height;;sTemp[7]=-.01f;
+        sTemp[9]=(width-100)/height;sTemp[10]=0;
+       //c[0]=0;c[1]=100f;c[2]=255f;c[3]=1.0f;
+        for (int i=0;i<25;i++) {
+            vLine[i] = new Square(sTemp);
+        }
+        //vLine.setColor(c);
     }
+
+    public void setVoronoiCoordinates(float s[],int i,int j){
+        vLine[i].setSquareCoords(s);
+        vSize=j;
+    }
+
+
     public void setPosition(float f[]){
         poseData=f;
     }
@@ -128,6 +152,8 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
 
+
+
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
 
@@ -135,8 +161,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         // Draw square
+
         mArena.draw(mMVPMatrix);
         mArena2.draw(mMVPMatrix);
+
         //density.Draw(mMVPMatrix);
         for (int i=0;i<10;i++){
             if (turtleList[i].getOn()==1) {
@@ -147,6 +175,10 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
                 turt1.Draw(scratch,turtleList[i].getState());
             }
         }
+
+        for (int i=0;i<vSize;i++){
+            vLine[i].draw(mMVPMatrix);
+        }
         /*scratch = new float[16];
         Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
@@ -156,6 +188,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
         Matrix.translateM(scratch, 0, tempX, tempY, 0);
         tar.Draw(scratch);
+
 
 
 

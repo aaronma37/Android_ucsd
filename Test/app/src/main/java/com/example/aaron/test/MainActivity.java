@@ -8,7 +8,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
-
+import com.example.aaron.simplevoronoi.src.main.java.be.humphreys.simplevoronoi.*;
 import org.ros.address.InetAddressFactory;
 import org.ros.android.MessageCallable;
 import org.ros.android.RosActivity;
@@ -18,8 +18,12 @@ import org.ros.node.NodeConfiguration;
 import org.ros.node.NodeMainExecutor;
 import geometry_msgs.Point;
 import geometry_msgs.Pose;
+
+import com.example.aaron.simplevoronoi.src.main.java.be.humphreys.simplevoronoi.Voronoi;
 import com.example.aaron.test.Talker;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 //import org.ros.rosjava_tutorial_pubsub.Talker;
@@ -34,7 +38,10 @@ public class MainActivity extends RosActivity {
     private Talker talker;
     private poseView poseview;
     private MyGLSurfaceView mGLView;
+    private float width1,height1;
+    private int flag=0;
     public Intent intent;
+    public Voronoi vor;
     public double p[];
     public float pos[]={0,0,0,0,0};
     public float poseData[]={0,0,0,0,0};
@@ -43,6 +50,9 @@ public class MainActivity extends RosActivity {
     private int currentApiVersion;
     //public turtle turt;
     TextView poseX;
+    private List<GraphEdge> voronoiEdges;
+    ArrayList<Double> temp= new ArrayList<Double>();
+    ArrayList<Double> temp2= new ArrayList<Double>();
 
 
 
@@ -163,6 +173,8 @@ public class MainActivity extends RosActivity {
         double num=1;
         talker = new Talker(num);
         poseview = new poseView();
+        vor = new Voronoi(.001);
+
 
 
         //poseview.setMessageType(std_msgs.String._TYPE);
@@ -180,7 +192,8 @@ public class MainActivity extends RosActivity {
         // At this point, the user has already been prompted to either enter the URI
         // of a master to use or to start a master locally.
         nodeConfiguration.setMasterUri(getMasterUri());
-
+        width1=mGLView.getWidth1();
+        height1=mGLView.getHeight1();
         //poseimporter.setTurt(turt);
         // The RosTextView is also a NodeMain that must be executed in order to
         // start displaying incoming messages.
@@ -195,69 +208,27 @@ public class MainActivity extends RosActivity {
         num=poseview.getX();
         talker.setNum(num);
         nodeMainExecutor.execute(talker, nodeConfiguration);
+
+
         ScheduledThreadPoolExecutor exec = new ScheduledThreadPoolExecutor(5);
-
-
         exec.scheduleAtFixedRate(new Runnable() {
             public void run() {
-
-
-                /*poseData = poseview.getPoseData();
-               pos[0] = poseData[0];
-                pos[1] = poseData[1];
-                pos[2] = poseData[2];
-                pos[3] = poseData[3];
-                pos[4] = poseData[4];*/
-
-                //turtleList[(int) poseData[4]].setData(poseData);
-                turtleList=poseview.getTurtles();
+                turtleList = poseview.getTurtles();
                 mGLView.updateRen(turtleList);
             }
         }, 0, 100, TimeUnit.MICROSECONDS);
 
-        /*
-        long period = 100; // the period between successive executions
-        exec.scheduleAtFixedRate(new MyTask(), 0, period, TimeUnit.MICROSECONDS);
-        long delay = 100; //the delay between the termination of one execution and the commencement of the next
-        exec.scheduleWithFixedDelay(new MyTask(), 0, delay, TimeUnit.MICROSECONDS);*/
 
-
-        /*while (1==1){
-
-            num=poseview.getX();
-            double p[]={0,0,0,0};
-            p[0]=poseview.getX();
-            p[1]=poseview.getY();
-
-            *//*pos[0]=(float)poseview.getX();
-            pos[1]=(float)poseview.getY();
-            pos[2]=(float)poseview.getZ();
-            pos[3]=(float)poseview.getYaw();*//*
-            poseData=poseview.getPoseData();
-            pos[0]=poseData[0];
-            pos[1]=poseData[1];
-            pos[2]=poseData[2];
-            pos[3]=poseData[3];
-            pos[4]=poseData[4];
-
-            turtleList[(int)poseData[4]].setData(poseData);
-            mGLView.updateRen(turtleList);
-            *//*System.out.println("ID FOUND: "+turtleList[0].getRot());
-            System.out.println("ID FOUND: "+poseData[1]);
-            System.out.println("ID FOUND: "+poseData[2]);
-            System.out.println("ID FOUND: "+poseData[3]);
-            System.out.println("ID FOUND: "+poseData[4]);
-            System.out.println("ID FOUND: "+poseData[5]);*//*
-
-
-            talker.setP(p);
-            try {
-                // Wait for 1 second.
-                Thread.sleep(1);
-                //wait();
+        ScheduledThreadPoolExecutor exec2 = new ScheduledThreadPoolExecutor(5);
+        exec2.scheduleAtFixedRate(new Runnable() {
+            public void run() {
+                if (flag==1){
+                    mGLView.setVoronoiCoordinates();
+                }
+                flag=mGLView.vFlag;
             }
-            catch (InterruptedException ex) {}
-        }*/
-    }
+        }, 0, 10000, TimeUnit.MICROSECONDS);
 
+
+    }
 }
