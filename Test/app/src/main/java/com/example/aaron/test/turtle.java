@@ -9,12 +9,17 @@ public class turtle {
     public float nameID=0;
     public int state=0;
     public int on=0;
+    private String identification;
 
     public turtle() {
         x=0;y=0;rot=0;z=0;state=0;on=0;
     }
 
     public int getState(){return state;}
+
+    public String getIdentification(){
+        return identification;
+    }
 
     public void setState(int i){state=i;}
 
@@ -44,7 +49,7 @@ public class turtle {
     }
 
 
-    public void setData(float[] f) {
+    public void setData(float[] f, String s) {
         x=f[0];
         y=f[1];
         z=f[2];
@@ -52,5 +57,6 @@ public class turtle {
         nameID=f[4];
         state=(int)f[5];
         on=(int)f[6];
+        identification=s;
     }
 }

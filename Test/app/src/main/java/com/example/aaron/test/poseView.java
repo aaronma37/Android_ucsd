@@ -127,7 +127,7 @@ public class poseView<T> implements NodeMain {
                 else if(frame_id.equals("Richard")){poseData[4]=2;}
                 else{poseData[4]=-1;}
                 poseData[6]=1;
-                turtleList[(int)poseData[4]].setData(poseData);
+                turtleList[(int)poseData[4]].setData(poseData,frame_id);
 
 
             }

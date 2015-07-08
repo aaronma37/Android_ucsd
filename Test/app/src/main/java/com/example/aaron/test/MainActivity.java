@@ -216,7 +216,7 @@ public class MainActivity extends RosActivity {
                 turtleList = poseview.getTurtles();
                 mGLView.updateRen(turtleList);
             }
-        }, 0, 100, TimeUnit.MICROSECONDS);
+        }, 0, 10000, TimeUnit.MICROSECONDS);
 
 
         ScheduledThreadPoolExecutor exec2 = new ScheduledThreadPoolExecutor(5);
@@ -226,8 +226,9 @@ public class MainActivity extends RosActivity {
                     mGLView.setVoronoiCoordinates();
                 }
                 flag=mGLView.vFlag;
+                mGLView.tick();
             }
-        }, 0, 10000, TimeUnit.MICROSECONDS);
+        }, 0, 50000, TimeUnit.MICROSECONDS);
 
 
     }

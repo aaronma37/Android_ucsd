@@ -26,6 +26,9 @@ package com.example.aaron.test;
         import android.util.Log;
 
         import java.nio.FloatBuffer;
+        import java.util.ArrayList;
+        import java.util.Collections;
+        import java.util.List;
 
 /**
  * Provides drawing instructions for a GLSurfaceView object. This class
@@ -42,12 +45,22 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     private Triangle mTriangle, robot;
     private Square   mSquare, mArena, mArena2;
     private Square vLine[] = new Square[25];
+    private Square fLine[] = new Square[100];
     private turtB turt1;
     private target tar;
     private gauss density;
+    //private ArrayList<textclass> textSystem= new ArrayList<textclass>();
+    private textclass textSystem;
+    private toggles vorToggle, freeDrawToggle;
+    private float textPosition[]= {-.95f, .5f};
+    public ArrayList<toText> textList = new ArrayList<toText>();
     private FloatBuffer textureBuffer;
     public Context context;
+
+    private int vToggle=0;
+    private int fToggle=0;
     private int vSize=0;
+    private int fSize=0;
     private float texture[] = {
             0.0f, 1.0f,     // top left     (V2)
             0.0f, 0.0f,     // bottom left  (V1)
@@ -75,7 +88,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     for (int i=0;i<10;i++){
         turtleList[i]=new turtle();
         if (t[i]!=null){
-        turtleList[i].setData(t[i].getData());}
+        turtleList[i].setData(t[i].getData(), t[i].getIdentification());}
     }
 
 
@@ -84,7 +97,7 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
     public void updateRen(turtle t[]){
         for (int i=0;i<10;i++){
             if (t[i]!=null){
-                turtleList[i].setData(t[i].getData());}
+                turtleList[i].setData(t[i].getData(), t[i].getIdentification());}
         }
     }
 
@@ -118,21 +131,46 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         mArena2  = new Square(sTemp);
         mArena2.setColor(c);
         robot = new Triangle();
-        //turtle1 = new turtleB(mActivityContext)
+
         turt1 = new turtB(context);
         tar =new target(context);
         //density = new gauss(context);
-
 
         sTemp[0]=-(width-100)/height;sTemp[1]=0;
         sTemp[3]=-(width-100)/height;sTemp[4]=-.01f;
         sTemp[6]=(width-100)/height;;sTemp[7]=-.01f;
         sTemp[9]=(width-100)/height;sTemp[10]=0;
-       //c[0]=0;c[1]=100f;c[2]=255f;c[3]=1.0f;
+
         for (int i=0;i<25;i++) {
             vLine[i] = new Square(sTemp);
         }
-        //vLine.setColor(c);
+
+        for (int i=0;i<100;i++) {
+            fLine[i] = new Square(sTemp);
+        }
+
+        float spriteCoords[] = {
+                -0.05f,  0.05f,   // top left
+                -0.05f, -0.05f,   // bottom left
+                0.05f, -0.05f,   // bottom right
+                0.05f,  0.05f}; //top right
+
+        spriteCoords[0]=(width-90)/height;spriteCoords[1]=-(height-10)/(height*2);
+        spriteCoords[2]=(width-90)/height;spriteCoords[3]=-(height-10)/(height*2)-.1f;
+        spriteCoords[4]=(width-90)/height-.1f;spriteCoords[5]=-(height-10)/(height*2)-.1f;
+        spriteCoords[6]=(width-90)/height-.1f;spriteCoords[7]=-(height-10)/(height*2);
+        vorToggle = new toggles(context,spriteCoords,0);
+
+        spriteCoords[0]=(width-90)/height-.11f;spriteCoords[1]=-(height-10)/(height*2);
+        spriteCoords[2]=(width-90)/height-.11f;spriteCoords[3]=-(height-10)/(height*2)-.1f;
+        spriteCoords[4]=(width-90)/height-.21f;spriteCoords[5]=-(height-10)/(height*2)-.1f;
+        spriteCoords[6]=(width-90)/height-.21f;spriteCoords[7]=-(height-10)/(height*2);
+        freeDrawToggle = new toggles(context, spriteCoords,1);
+
+        textSystem = new textclass(context, "A");
+        textList.add(new toText(-.95f,.5f,0,"UCSD Distributed Robotics Lab"));
+        textList.add(new toText(-.55f,-.1f,0,"No Robots Selected"));
+
     }
 
     public void setVoronoiCoordinates(float s[],int i,int j){
@@ -140,32 +178,33 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
         vSize=j;
     }
 
+    public void setFreeDrawCoordinates(float s[],int i, int j){
+        fLine[i].setSquareCoords(s);
+        fSize=j;
+    }
 
-    public void setPosition(float f[]){
-        poseData=f;
+
+    public void setPosition(float f[]) {
+        poseData = f;
     }
 
     @Override
     public void onDrawFrame(GL10 unused) {
-        float[] scratch = new float[16];
 
+        float[] scratch = new float[16];
         // Draw background color
         GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-
-
-
         // Set the camera position (View matrix)
         Matrix.setLookAtM(mViewMatrix, 0, 0, 0, -3, 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-
         // Calculate the projection and view transformation
         Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-
-        // Draw square
-
+        // DRAW OUTLINE
         mArena.draw(mMVPMatrix);
         mArena2.draw(mMVPMatrix);
-
-        //density.Draw(mMVPMatrix);
+        // DRAW VORONOI TOGGLE ICON
+        vorToggle.Draw(mMVPMatrix,vToggle);
+        freeDrawToggle.Draw(mMVPMatrix,fToggle);
+        // DRAW TURTLES
         for (int i=0;i<10;i++){
             if (turtleList[i].getOn()==1) {
                 Matrix.setRotateM(mRotationMatrix, 0, 0, 0, 0, 1.0f);
@@ -176,23 +215,58 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
             }
         }
 
-        for (int i=0;i<vSize;i++){
-            vLine[i].draw(mMVPMatrix);
+        // DRAW VORONOI LINES
+        if (vToggle==1) {
+            for (int i = 0; i < vSize; i++) {
+                vLine[i].draw(mMVPMatrix);
+            }
         }
+        if (fToggle==1) {
+            for (int i = 0; i < fSize  ; i++) {
+                fLine[i].draw(mMVPMatrix);
+            }
+        }
+
+
+
         /*scratch = new float[16];
         Matrix.setRotateM(mRotationMatrix, 0, mAngle, 0, 0, 1.0f);
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
         mTriangle.draw(scratch);*/
 
+        // DRAW TARGET MARK
         Matrix.setRotateM(mRotationMatrix, 0, 0, 0, 0, 1.0f);
         Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
         Matrix.translateM(scratch, 0, tempX, tempY, 0);
         tar.Draw(scratch);
 
+        //START DRAWING TEXT BLOCK
+        //
+        Matrix.setRotateM(mRotationMatrix, 0, 0, 0, 0, 1.0f);
 
-
-
-
+        int temp = 0;
+        for (int j = 0; j<textList.size();j++){
+            Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, mRotationMatrix, 0);
+            Matrix.translateM(scratch, 0, textList.get(j).getyGl(), textList.get(j).getxGl(), 0);
+            for (int i = 0; i<textList.get(j).getText().length();i++){
+                String s = String.valueOf(textList.get(j).getText().charAt(i));
+                if (Character.isUpperCase(textList.get(j).getText().codePointAt(i))==true || s.equals(" ")){
+                    if (temp!=0){
+                        Matrix.translateM(scratch, 0, -.01f, 0f, 0);
+                    }
+                    textSystem.Draw(scratch, s, 0);
+                    temp++;
+                    Matrix.translateM(scratch, 0, -.005f, 0f, 0);
+                }
+                else{
+                    textSystem.Draw(scratch, s, 1);
+                    temp = 0;
+                }
+                Matrix.translateM(scratch, 0, -.015f, 0f, 0);
+            }
+        }
+        //
+        //END DRAWING TEXT BLOCK
     }
 
     public void tempFun(float xx, float yy){
@@ -271,6 +345,26 @@ public class MyGLRenderer implements GLSurfaceView.Renderer {
      */
     public void setAngle(float angle) {
         mAngle = angle;
+    }
+
+    public void setvToggle(int i){
+        vToggle=i;
+    }
+
+    public int getvToggle(){
+        return vToggle;
+    }
+
+    public void setfToggle(int i){
+        fToggle=i;
+    }
+
+    public int getfToggle(){
+        return fToggle;
+    }
+
+    public void eraseFreeLine(){
+        fSize=0;
     }
 
 }
